@@ -70,11 +70,11 @@ struct AddTodoView: View {
     private func saveTodo() {
         let newTodo = Todo(title: title, priority: priority)
         do {
-            try todosStore.save(newTodo)
+            try todosStore.create(newTodo)
             onSave()
             dismiss()
         } catch {
-            print("Error saving todo: \(error)")
+            print("Error creating todo: \(error)")
         }
     }
 }

@@ -21,11 +21,11 @@ protocol StoreProtocol<Model>: Sendable {
     /// The type of the item to be stored.
     associatedtype Model: PersistentModel
       
-    /// Saves an item to the storage.
+    /// Creates a new item in the storage.
     ///
-    /// - Parameter item: The `Model` object representing the item to be saved.
-    /// - Throws: An error if the item could not be saved.
-    func save(_ item: Model) async throws
+    /// - Parameter item: The `Model` object representing the item to be created.
+    /// - Throws: An error if the item could not be created.
+    func create(_ item: Model) async throws
     
     /// Fetches all stored items.
     ///

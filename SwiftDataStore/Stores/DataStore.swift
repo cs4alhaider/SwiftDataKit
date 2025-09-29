@@ -13,11 +13,11 @@ import SwiftData
 /// A generic data store for managing persistent model objects using SwiftData.
 ///
 /// `DataStore` provides a type-safe interface for CRUD operations on any `PersistentModel` type.
-/// It uses the shared `SwiftDataDB` instance to access the underlying model context.
+/// It uses the shared `SwiftDataKit` instance to access the underlying model context.
 ///
 /// ## Overview
 /// This class implements the `StoreProtocol` and provides methods for:
-/// - Saving new items
+/// - Creating new items
 /// - Fetching items with sorting, filtering, and pagination
 /// - Updating existing items
 /// - Deleting individual items or batches
@@ -26,9 +26,9 @@ import SwiftData
 /// ```swift
 /// let todoStore = DataStore<Todo>()
 ///
-/// // Save a new todo
+/// // Create a new todo
 /// let todo = Todo(title: "Buy groceries")
-/// try todoStore.save(todo)
+/// try todoStore.create(todo)
 ///
 /// // Fetch todos with filtering
 /// let highPriorityTodos = try todoStore.fetch(
@@ -39,7 +39,7 @@ import SwiftData
 ///
 /// ## Thread Safety
 /// This class is marked with `@MainActor` to ensure all operations happen on the main thread.
-/// For background operations, use `SwiftDataDB.shared.newBackgroundContext()`.
+/// For background operations, use `SwiftDataKit.shared.newBackgroundContext()`.
 ///
 @MainActor
 final class DataStore<T>: StoreProtocol where T: PersistentModel {
@@ -54,32 +54,32 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
 
     /// Initializes a new DataStore instance.
     ///
-    /// The store automatically uses the shared SwiftDataDB's model context,
+    /// The store automatically uses the shared SwiftDataKit's model context,
     /// which must be configured before creating any DataStore instances.
     ///
-    /// - Note: Ensure `SwiftDataDB.configure()` has been called at app startup
+    /// - Note: Ensure `SwiftDataKit.configure()` has been called at app startup
     ///         before creating DataStore instances.
     init(modelContext: ModelContext? = nil) {
-        self.modelContext = modelContext ?? SwiftDataDB.shared.modelContext
+        self.modelContext = modelContext ?? SwiftDataKit.shared.modelContext
     }
 
     // MARK: - Public Methods - Create
 
-    /// Saves a new item to the persistent store.
+    /// Creates a new item in the persistent store.
     ///
     /// This method inserts the item into the model context and immediately saves it.
     /// If autosave is enabled on the context, the save happens automatically.
     ///
-    /// - Parameter item: The model object to be saved.
+    /// - Parameter item: The model object to be created.
     ///
-    /// - Throws: `DataStoreError.saveFailed` if the save operation fails.
+    /// - Throws: `DataStoreError.saveFailed` if the create operation fails.
     ///
     /// - Example:
     ///   ```swift
     ///   let newTodo = Todo(title: "Write documentation")
-    ///   try todoStore.save(newTodo)
+    ///   try todoStore.create(newTodo)
     ///   ```
-    func save(_ item: T) throws {
+    func create(_ item: T) throws {
         modelContext.insert(item)
         try modelContext.save()
     }
@@ -320,10 +320,10 @@ class DataStoreUsageExamples {
 
     // MARK: - Create/Update/Delete Examples
 
-    /// Save a new todo
+    /// Create a new todo
     func createTodo(title: String, priority: Priority = .medium) throws {
         let todo = Todo(title: title, priority: priority)
-        try todoStore.save(todo)
+        try todoStore.create(todo)
     }
 
     /// Update multiple properties of a todo

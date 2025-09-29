@@ -13,19 +13,19 @@ struct SwiftDataStoreApp: App {
 
     init() {
         do {
-            try SwiftDataDB.configure(
+            try SwiftDataKit.configure(
                 for: Todo.self,
                 config: ModelConfiguration(isStoredInMemoryOnly: false)
             )
         } catch {
-            fatalError("Failed to configure SwiftDataDB: \(error)")
+            fatalError("Failed to configure SwiftDataKit: \(error)")
         }
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(SwiftDataDB.shared.modelContainer)
+                .modelContainer(SwiftDataKit.shared.modelContainer)
         }
     }
 }

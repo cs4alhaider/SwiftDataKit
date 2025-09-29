@@ -1,5 +1,5 @@
 //
-//  SwiftDataDB.swift
+//  SwiftDataKit.swift
 //  SwiftDataStore
 //
 //  Created by Abdullah Alhaider on 29/09/2025.
@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-/// SwiftDataDB is a singleton manager for SwiftData's ModelContainer and ModelContext.
+/// SwiftDataKit is a singleton manager for SwiftData's ModelContainer and ModelContext.
 /// It provides a centralized way to configure and access the data store throughout the application.
 ///
 /// ## Overview
@@ -21,14 +21,14 @@ import SwiftUI
 /// ## Usage Example
 /// ```swift
 /// // Configure at app startup
-/// try SwiftDataDB.configure(
+/// try SwiftDataKit.configure(
 ///     for: Todo.self, User.self,
 ///     config: ModelConfiguration(isStoredInMemoryOnly: false)
 /// )
 ///
 /// // Access anywhere in the app
-/// let context = SwiftDataDB.shared.modelContext
-/// let container = SwiftDataDB.shared.modelContainer
+/// let context = SwiftDataKit.shared.modelContext
+/// let container = SwiftDataKit.shared.modelContainer
 /// ```
 ///
 /// ## Important Notes
@@ -38,13 +38,13 @@ import SwiftUI
 /// - Supports migration plans for schema changes
 ///
 @Observable
-public class SwiftDataDB {
+public class SwiftDataKit {
 
     // MARK: - Singleton Instance
 
-    /// The shared singleton instance of SwiftDataDB.
+    /// The shared singleton instance of SwiftDataKit.
     /// This ensures only one database configuration exists in the app.
-    public static let shared: SwiftDataDB = SwiftDataDB()
+    public static let shared: SwiftDataKit = SwiftDataKit()
 
     // MARK: - Public Properties
 
@@ -57,7 +57,7 @@ public class SwiftDataDB {
     /// - Handling migrations between schema versions
     public var modelContainer: ModelContainer {
         guard let modelContainer: ModelContainer = _modelContainer else {
-            fatalError("ModelContainer not initialized. Call SwiftDataDB.configure() at app startup before accessing the container.")
+            fatalError("ModelContainer not initialized. Call SwiftDataKit.configure() at app startup before accessing the container.")
         }
         return modelContainer
     }
@@ -72,7 +72,7 @@ public class SwiftDataDB {
     /// - Managing the object graph
     public var modelContext: ModelContext {
         guard let modelContext: ModelContext = _modelContext else {
-            fatalError("ModelContext not initialized. Call SwiftDataDB.configure() at app startup before accessing the context.")
+            fatalError("ModelContext not initialized. Call SwiftDataKit.configure() at app startup before accessing the context.")
         }
         return modelContext
     }
@@ -97,7 +97,7 @@ public class SwiftDataDB {
 
     // MARK: - Public Configuration Methods
 
-    /// Configures the SwiftDataDB with the provided models and settings.
+    /// Configures the SwiftDataKit with the provided models and settings.
     ///
     /// This method should be called once at app startup, typically in the App's initializer.
     /// It sets up the entire data stack including the container and context.
@@ -119,7 +119,7 @@ public class SwiftDataDB {
     /// - Example:
     ///   ```swift
     ///   do {
-    ///       try SwiftDataDB.configure(
+    ///       try SwiftDataKit.configure(
     ///           for: Todo.self, User.self,
     ///           migrationPlan: AppMigrationPlan.self,
     ///           config: ModelConfiguration(
@@ -210,9 +210,9 @@ public class SwiftDataDB {
     }
 }
 
-// MARK: - SwiftDataDB Extensions
+// MARK: - SwiftDataKit Extensions
 
-extension SwiftDataDB {
+extension SwiftDataKit {
 
     /// Creates a new background ModelContext for concurrent operations.
     ///
@@ -224,7 +224,7 @@ extension SwiftDataDB {
     /// - Example:
     ///   ```swift
     ///   Task {
-    ///       let backgroundContext = SwiftDataDB.shared.newBackgroundContext()
+    ///       let backgroundContext = SwiftDataKit.shared.newBackgroundContext()
     ///       // Perform heavy data operations
     ///       try backgroundContext.save()
     ///   }
