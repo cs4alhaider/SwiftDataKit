@@ -6,12 +6,26 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct SwiftDataStoreApp: App {
+
+    init() {
+        do {
+            try SwiftDataDB.configure(
+                for: Todo.self,
+                config: ModelConfiguration(isStoredInMemoryOnly: false)
+            )
+        } catch {
+            fatalError("Failed to configure SwiftDataDB: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(SwiftDataDB.shared.modelContainer)
         }
     }
 }
