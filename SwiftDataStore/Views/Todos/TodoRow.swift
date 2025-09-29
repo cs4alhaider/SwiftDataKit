@@ -10,7 +10,7 @@ import SwiftUI
 struct TodoRow: View {
     let todo: Todo
     let onToggle: () -> Void
-    @State private var isAnimating = false
+    @State private var isAnimating: Bool = false
 
     var body: some View {
         HStack {

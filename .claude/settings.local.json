@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "mcp__apple-docs__search_apple_docs",
+      "mcp__apple-docs__get_apple_doc_content"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

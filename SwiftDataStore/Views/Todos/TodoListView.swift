@@ -29,9 +29,7 @@ struct TodoListView: View {
                     Section("Active") {
                         ForEach(activeTodos, id: \.persistentModelID) { todo in
                             TodoRow(todo: todo, onToggle: {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                    toggleTodo(todo)
-                                }
+                                toggleTodo(todo)
                             })
                             .onTapGesture {
                                 selectedTodo = todo
@@ -50,9 +48,7 @@ struct TodoListView: View {
                     Section("Completed") {
                         ForEach(completedTodos, id: \.persistentModelID) { todo in
                             TodoRow(todo: todo, onToggle: {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                    toggleTodo(todo)
-                                }
+                                toggleTodo(todo)
                             })
                             .opacity(0.6)
                             .onTapGesture {
@@ -109,7 +105,15 @@ struct TodoListView: View {
 
     private func loadTodos() {
         do {
-            todos = try todosStore.fetch(sortedBy: [SortDescriptor(\.createdAt, order: .reverse)])
+            let now = Date.now
+            todos = try todosStore.fetch(
+                sortedBy: [SortDescriptor(\.createdAt, order: .reverse)],
+                predicate: #Predicate { todo in
+                    // todo.isCompleted == true
+                    todo.createdAt < now
+                },
+                fetchOptions: .paging(offset: 0, limit: 100)
+            )
         } catch {
             print("Error loading todos: \(error)")
         }
@@ -120,7 +124,7 @@ struct TodoListView: View {
             try todosStore.update(todo) { item in
                 item.isCompleted.toggle()
             }
-            loadTodos()
+//            loadTodos()
         } catch {
             print("Error updating todo: \(error)")
         }
