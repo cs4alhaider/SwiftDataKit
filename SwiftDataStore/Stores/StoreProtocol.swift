@@ -16,7 +16,7 @@ import SwiftData
 // https://www.hackingwithswift.com/quick-start/swiftdata/how-to-optimize-the-performance-of-your-swiftdata-apps
 
 /// A protocol defining the required functionality for a store system.
-protocol StoreProtocol: Sendable {
+protocol StoreProtocol<Model>: Sendable {
 
     /// The type of the item to be stored.
     associatedtype Model: PersistentModel

@@ -1,6 +1,80 @@
+import Foundation
 import SwiftData
 import SwiftUI
-import Foundation
+
+// MARK: - DataStore Errors
+
+enum DataStoreError: LocalizedError {
+    case itemNotFound
+    case contextMismatch
+    case saveFailed(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .itemNotFound:
+            return "The requested item was not found in the data store."
+        case .contextMismatch:
+            return "The item belongs to a different model context."
+        case .saveFailed(let error):
+            return "Failed to save changes: \(error.localizedDescription)"
+        }
+    }
+}
+
+@Observable
+class SwiftDataDB {
+    static let shared: SwiftDataDB = SwiftDataDB()
+
+    public var modelContainer: ModelContainer {
+        guard let modelContainer: ModelContainer = _modelContainer else {
+            fatalError("ModelContainer not initialized, call initialize() first")
+        }
+        return modelContainer
+    }
+
+    public var modelContext: ModelContext {
+        guard let modelContext: ModelContext = _modelContext else {
+            fatalError("ModelContext not initialized, call initialize() first")
+        }
+        return modelContext
+    }
+
+    private var _modelContainer: ModelContainer?
+    private var _modelContext: ModelContext?
+
+    private init() {
+
+    }
+
+    /// Initializes the SwiftDataDB with the provided configuration and models.
+    ///
+    /// - Parameters:
+    ///   - config: The configuration for the ModelContainer.
+    ///   - models: The models to be stored in the ModelContainer.
+    /// - Throws: An error if the ModelContainer could not be created.
+    public static func configure(
+        for models: any PersistentModel.Type...,
+        migrationPlan: (any SchemaMigrationPlan.Type)? = nil,
+        config: ModelConfiguration = .init(isStoredInMemoryOnly: false)
+    ) throws {
+        try shared.initialize(for: Schema(models), migrationPlan: migrationPlan, config: config)
+    }
+
+    private func initialize(
+        for schema: Schema,
+        migrationPlan: (any SchemaMigrationPlan.Type)? = nil,
+        config: ModelConfiguration = .init(isStoredInMemoryOnly: false)
+    ) throws {
+        let container: ModelContainer = try ModelContainer(
+            for: schema,
+            migrationPlan: migrationPlan,
+            configurations: config
+        )
+        self._modelContainer = container
+        self._modelContext = ModelContext(container)
+        self._modelContext?.autosaveEnabled = true
+    }
+}
 
 // MARK: - DataStore Implementation
 
@@ -25,11 +99,11 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
             // BUG. FIXME, ModelContainer should take more than one Model
             let container: ModelContainer = try ModelContainer(
                 for: T.self,
-                configurations: config
+                // configurations: config
             )
             self.modelContainer = container
             self.modelContext = ModelContext(container)
-            self.modelContext.autosaveEnabled = false
+            self.modelContext.autosaveEnabled = true
 
         } catch {
             fatalError("Failed to create ModelContainer for \(T.self): \(error)")
@@ -44,7 +118,7 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
         modelContext.insert(item)
         try modelContext.save()
     }
-    
+
     /// Fetches all stored items.
     ///
     /// Parameters:
@@ -71,12 +145,12 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
             predicate: predicate,
             sortBy: sortDescriptors
         )
-        // ignoring `.all` as it's by default will fetch all items if not specified, 
+        // ignoring `.all` as it's by default will fetch all items if not specified,
         if case .paging(let offset, let limit) = fetchOptions {
             fetchRequest.fetchOffset = offset
             fetchRequest.fetchLimit = limit
         }
-        // Ignoring `.all` as it's by default will fetch all properties if not specified, 
+        // Ignoring `.all` as it's by default will fetch all properties if not specified,
         if case .custom(let properties) = propertiesToFetch {
             fetchRequest.propertiesToFetch = properties
         }
@@ -85,7 +159,7 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
         }
         return try modelContext.fetch(fetchRequest)
     }
-    
+
     /// Fetches a single item from the storage by its ID.
     ///
     /// - Parameter id: The ID of the item to fetch.
@@ -95,7 +169,7 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
         // https://www.hackingwithswift.com/quick-start/swiftdata/how-to-find-a-swiftdata-object-by-its-identifier
         modelContext.registeredModel(for: id)
     }
-    
+
     /// Fetches the count of stored items.
     ///
     /// - Parameter predicate: An optional `Predicate<Model>` to filter the items.
@@ -107,7 +181,7 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
         )
         return try modelContext.fetchCount(fetchRequest)
     }
-    
+
     /// Updates an existing item in the storage.
     ///
     /// - Parameters:
@@ -115,8 +189,16 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
     ///   - updates: A closure that performs the updates on the item.
     /// - Throws: An error if the item could not be updated.
     func update(_ item: T, updates: (T) -> Void) throws {
+        // Insert the item into the context (this will handle both new and existing items)
+        modelContext.insert(item)
+
+        // Apply updates to the item
         updates(item)
-        try modelContext.save()
+
+        // Save if there are changes
+        if modelContext.hasChanges {
+            try modelContext.save()
+        }
     }
 
     func delete(_ item: T) throws {
@@ -132,7 +214,6 @@ final class DataStore<T>: StoreProtocol where T: PersistentModel {
         try modelContext.save()
     }
 }
-
 
 @MainActor
 class HowToUse {
@@ -161,7 +242,10 @@ class HowToUse {
         try todoStore.save(todo)
     }
 
-    func updateTodo(_ todo: Todo, newTitle: String? = nil, newPriority: Priority? = nil, toggleComplete: Bool = false) throws {
+    func updateTodo(
+        _ todo: Todo, newTitle: String? = nil, newPriority: Priority? = nil,
+        toggleComplete: Bool = false
+    ) throws {
         try todoStore.update(todo) { item in
             if let newTitle = newTitle {
                 item.title = newTitle
