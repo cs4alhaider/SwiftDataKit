@@ -37,12 +37,7 @@ import SwiftData
 /// )
 /// ```
 ///
-/// ## Thread Safety
-/// This class is marked with `@MainActor` to ensure all operations happen on the main thread.
-/// For background operations, use `SwiftDataKit.shared.newBackgroundContext()`.
-///
-@MainActor
-final class DataStore<T>: DataRepository where T: PersistentModel {
+struct DataStore<T>: DataRepository where T: PersistentModel {
 
     // MARK: - Properties
 

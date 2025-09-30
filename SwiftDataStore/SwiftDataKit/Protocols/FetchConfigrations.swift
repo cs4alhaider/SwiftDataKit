@@ -8,8 +8,6 @@
 import Foundation
 import SwiftData
 
-// MARK: - FetchConfigrations
-
 /// Configuration for data fetching in `ObservableDataStore`.
 ///
 /// This struct encapsulates all the parameters needed to configure how data is fetched
