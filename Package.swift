@@ -3,7 +3,7 @@
 
 import PackageDescription
 
-let package = Package(
+let package: Package = Package(
     name: "SwiftDataKit",
     defaultLocalization: "en",
     platforms: [.iOS(.v17), .macOS(.v10_15)],
