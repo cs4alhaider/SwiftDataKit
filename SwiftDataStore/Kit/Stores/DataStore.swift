@@ -16,7 +16,7 @@ import SwiftData
 /// It uses the shared `SwiftDataKit` instance to access the underlying model context.
 ///
 /// ## Overview
-/// This class implements the `StoreProtocol` and provides methods for:
+/// This class implements the `DataRepository` and provides methods for:
 /// - Creating new items
 /// - Fetching items with sorting, filtering, and pagination
 /// - Updating existing items
@@ -42,7 +42,7 @@ import SwiftData
 /// For background operations, use `SwiftDataKit.shared.newBackgroundContext()`.
 ///
 @MainActor
-final class DataStore<T>: StoreProtocol where T: PersistentModel {
+final class DataStore<T>: DataRepository where T: PersistentModel {
 
     // MARK: - Properties
 

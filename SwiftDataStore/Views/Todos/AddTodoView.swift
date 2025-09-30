@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AddTodoView: View {
-    let todosStore: any StoreProtocol<Todo>
+    let todosStore: any DataRepository<Todo>
     let onSave: () -> Void
 
     @Environment(\.dismiss) private var dismiss

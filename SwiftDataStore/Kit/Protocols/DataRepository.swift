@@ -1,6 +1,6 @@
 //
-//  Store.swift
-//  LocationKit
+//  DataRepository.swift
+//  SwiftDataStore
 //
 //  Created by Abdullah Alhaider on 2024-11-21.
 //
@@ -8,25 +8,20 @@
 import Foundation
 import SwiftData
 
-// MARK: - StoreProtocol
+// MARK: - DataRepository
 
-// Good to know:
-// https://developer.apple.com/documentation/swiftdata/persistentmodel
-// How to optimize:
-// https://www.hackingwithswift.com/quick-start/swiftdata/how-to-optimize-the-performance-of-your-swiftdata-apps
-
-/// A protocol defining the required functionality for a store system.
-protocol StoreProtocol<Model>: Sendable {
+/// A protocol defining the required functionality for a data repository.
+protocol DataRepository<Model>: Sendable {
 
     /// The type of the item to be stored.
     associatedtype Model: PersistentModel
-      
+
     /// Creates a new item in the storage.
     ///
     /// - Parameter item: The `Model` object representing the item to be created.
     /// - Throws: An error if the item could not be created.
     func create(_ item: Model) throws
-    
+
     /// Fetches all stored items.
     ///
     /// Parameters:
@@ -56,14 +51,14 @@ protocol StoreProtocol<Model>: Sendable {
     /// - Returns: The `Model` object representing the fetched item, or `nil` if no item is found.
     /// - Throws: An error if the item could not be fetched.
     func fetch(id: PersistentIdentifier) throws -> Model?
-    
+
     /// Fetches the count of stored items.
     ///
     /// - Parameter predicate: An optional `Predicate<Model>` to filter the items.
     /// - Returns: The count of stored items.
     /// - Throws: An error if the count could not be fetched.
     func fetchCount(predicate: Predicate<Model>?) throws -> Int
-    
+
     /// Updates an existing item in the storage.
     ///
     /// - Parameters:

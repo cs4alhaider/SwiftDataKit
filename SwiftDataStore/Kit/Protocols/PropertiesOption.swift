@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import SwiftData
 
 /// Enum to define the properties to fetch, choseing custom properties is better for performance
-enum PropertiesOption<Model: Identifiable> {
+enum PropertiesOption<Model: PersistentModel> {
     /// Fetch all properties
     case all
     /// Fetch custom properties

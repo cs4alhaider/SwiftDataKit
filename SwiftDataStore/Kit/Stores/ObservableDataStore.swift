@@ -8,7 +8,6 @@
 import Combine
 import Foundation
 import SwiftData
-import Combine
 
 // MARK: - DataStore Implementation
 
@@ -18,7 +17,7 @@ import Combine
 /// It uses the shared `SwiftDataKit` instance to access the underlying model context.
 ///
 /// ## Overview
-/// This class implements the `StoreProtocol` and provides methods for:
+/// This class implements the `DataRepository` and provides methods for:
 /// - Creating new items
 /// - Fetching items with sorting, filtering, and pagination
 /// - Updating existing items
@@ -45,7 +44,7 @@ import Combine
 ///
 @MainActor
 @Observable
-final class ObservableDataStore<T>: ObservableStoreProtocol where T: PersistentModel {
+final class ObservableDataStore<T>: ObservableDataRepository where T: PersistentModel {
 
     // MARK: - Public Properties
 

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditTodoView: View {
-    let todosStore: any StoreProtocol<Todo>
+    let todosStore: any DataRepository<Todo>
     let todo: Todo
     let onSave: () -> Void
 
@@ -17,7 +17,7 @@ struct EditTodoView: View {
     @State private var priority: Priority
     @State private var isCompleted: Bool
 
-    init(todosStore: any StoreProtocol<Todo>, todo: Todo, onSave: @escaping () -> Void) {
+    init(todosStore: any DataRepository<Todo>, todo: Todo, onSave: @escaping () -> Void) {
         self.todosStore = todosStore
         self.todo = todo
         self.onSave = onSave
@@ -51,8 +51,11 @@ struct EditTodoView: View {
 
                 Section("Status") {
                     Toggle(isOn: $isCompleted) {
-                        Label("Completed", systemImage: isCompleted ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(isCompleted ? .green : .secondary)
+                        Label(
+                            "Completed",
+                            systemImage: isCompleted ? "checkmark.circle.fill" : "circle"
+                        )
+                        .foregroundColor(isCompleted ? .green : .secondary)
                     }
                     .toggleStyle(SwitchToggleStyle(tint: .green))
                 }
