@@ -14,6 +14,7 @@ struct AddTodoView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var priority = Priority.medium
+    @FocusState private var isTitleFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -21,6 +22,12 @@ struct AddTodoView: View {
                 Section("Todo Details") {
                     TextField("Title", text: $title)
                         .textFieldStyle(DefaultTextFieldStyle())
+                        .focused($isTitleFocused)
+                        .onSubmit {
+                            if !title.isEmpty {
+                                saveTodo()
+                            }
+                        }
 
                     Picker("Priority", selection: $priority) {
                         Label("Low", systemImage: "arrow.down.circle")
@@ -63,6 +70,9 @@ struct AddTodoView: View {
                     .fontWeight(.semibold)
                     .disabled(title.isEmpty)
                 }
+            }
+            .task {
+                isTitleFocused = true
             }
         }
     }
