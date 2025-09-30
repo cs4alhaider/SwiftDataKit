@@ -25,7 +25,7 @@ protocol StoreProtocol<Model>: Sendable {
     ///
     /// - Parameter item: The `Model` object representing the item to be created.
     /// - Throws: An error if the item could not be created.
-    func create(_ item: Model) async throws
+    func create(_ item: Model) throws
     
     /// Fetches all stored items.
     ///
@@ -48,21 +48,21 @@ protocol StoreProtocol<Model>: Sendable {
         propertiesToFetch: PropertiesOption<Model>,
         relationshipKeyPathsForPrefetching: [PartialKeyPath<Model>]?,
         fetchOptions: FetchOptions
-    ) async throws -> [Model]
+    ) throws -> [Model]
 
     /// Fetches a single item from the storage by its ID.
     ///
     /// - Parameter id: The ID of the item to fetch.
     /// - Returns: The `Model` object representing the fetched item, or `nil` if no item is found.
     /// - Throws: An error if the item could not be fetched.
-    func fetch(id: PersistentIdentifier) async throws -> Model?
+    func fetch(id: PersistentIdentifier) throws -> Model?
     
     /// Fetches the count of stored items.
     ///
     /// - Parameter predicate: An optional `Predicate<Model>` to filter the items.
     /// - Returns: The count of stored items.
     /// - Throws: An error if the count could not be fetched.
-    func fetchCount(predicate: Predicate<Model>?) async throws -> Int
+    func fetchCount(predicate: Predicate<Model>?) throws -> Int
     
     /// Updates an existing item in the storage.
     ///
@@ -70,13 +70,13 @@ protocol StoreProtocol<Model>: Sendable {
     ///   - item: The `Model` object to be updated.
     ///   - updates: A closure that performs the updates on the item.
     /// - Throws: An error if the item could not be updated.
-    func update(_ item: Model, updates: (Model) -> Void) async throws
+    func update(_ item: Model, updates: (Model) -> Void) throws
 
     /// Deletes a single item from the storage.
     ///
     /// - Parameter item: The `Model` object representing the item to be deleted.
     /// - Throws: An error if the item could not be deleted.
-    func delete(_ item: Model) async throws
+    func delete(_ item: Model) throws
 
     /// Deletes all stored items.
     ///
@@ -85,5 +85,5 @@ protocol StoreProtocol<Model>: Sendable {
     /// - If no predicate is provided, all items will be deleted and the model will be deleted from the store.
     /// - You can read more about it here: https://www.hackingwithswift.com/quick-start/swiftdata/how-to-delete-a-swiftdata-object
     /// - Throws: An error if the items could not be deleted.
-    func deleteAll(where predicate: Predicate<Model>?) async throws
+    func deleteAll(where predicate: Predicate<Model>?) throws
 }
