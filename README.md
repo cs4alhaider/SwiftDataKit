@@ -28,6 +28,15 @@ SwiftData is powerful but tightly coupled to SwiftUI's view lifecycle with `@Que
 6. **Performance**: Built-in support for selective property fetching and relationship prefetching
 7. **Testability**: Easy to mock with protocol-based architecture
 
+## Screenshots
+
+|              Manual Store              |             Observable Store             |            Native SwiftUI            |
+| :------------------------------------: | :--------------------------------------: | :----------------------------------: |
+|  <img src="Assets/1.png" width="250">  |   <img src="Assets/2.png" width="250">   | <img src="Assets/3.png" width="250"> |
+| Manual data fetching with full control | Automatic UI updates with reactive store |      Native @Query integration       |
+
+> **💡 Try it yourself!** Check out the [Example](Example/) project to see all three implementation patterns in action.
+
 ## Installation
 
 ### Swift Package Manager
