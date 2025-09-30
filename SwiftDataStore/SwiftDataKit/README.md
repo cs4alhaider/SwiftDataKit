@@ -212,10 +212,7 @@ class TodoViewModel: ObservableObject {
 | Feature           | DataStore                    | ObservableDataStore    |
 | ----------------- | ---------------------------- | ---------------------- |
 | Automatic Updates | No                           | Yes                    |
-| Memory Overhead   | Low                          | Moderate               |
-| Control Level     | High                         | Medium                 |
 | Best For          | Custom logic, background ops | Real-time UI, lists    |
-| Setup Complexity  | Simple                       | Requires configuration |
 | Use Case          | On-demand fetching           | Always-current data    |
 
 ### Supporting Types
@@ -415,29 +412,24 @@ class TodoViewModel: ObservableObject {
     func addTodo(title: String) {
         let todo = Todo(title: title)
         try? store.create(todo)
-        // store.items automatically updates
     }
 
     // UPDATE
     func toggleCompletion(_ todo: Todo) {
         try? store.update(todo) { $0.isCompleted.toggle() }
-        // store.items automatically updates
     }
 
     func setPriority(_ todo: Todo, priority: Priority) {
         try? store.update(todo) { $0.priority = priority }
-        // store.items automatically updates
     }
 
     // DELETE
     func deleteTodo(_ todo: Todo) {
         try? store.delete(todo)
-        // store.items automatically updates
     }
 
     func clearCompleted() {
         try? store.deleteAll(where: #Predicate { $0.isCompleted })
-        // store.items automatically updates
     }
 
     // COUNT (manual fetch, not auto-updated)
