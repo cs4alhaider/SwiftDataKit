@@ -2,25 +2,31 @@
 
 A lightweight, type-safe wrapper around SwiftData that simplifies database operations and provides flexible data management patterns for iOS, macOS, watchOS, and tvOS applications.
 
+SwiftDataKit makes it easy to access and manage SwiftData outside of SwiftUI views - in ViewModels, services, business logic, and background tasks - while maintaining full compatibility with native SwiftUI patterns like `@Query` and `@Environment(\.modelContext)`.
+
 ## Overview
 
 SwiftDataKit eliminates boilerplate code when working with SwiftData by providing:
 
+- **Universal Access**: Use SwiftData anywhere in your app, not just in SwiftUI views
 - **Centralized Configuration**: Single setup point for your entire data stack
 - **Type-Safe Repository Pattern**: Generic data stores that work with any `PersistentModel`
 - **Observable Data Stores**: Automatic UI synchronization with reactive updates
 - **Flexible Querying**: Advanced filtering, sorting, pagination, and relationship prefetching
 - **Background Context Support**: Easy concurrent operations without blocking the main thread
+- **SwiftUI Compatible**: Works seamlessly alongside native SwiftUI data features
 
 ## Why SwiftDataKit?
 
-SwiftData is powerful but can be verbose for common operations. SwiftDataKit addresses this by:
+SwiftData is powerful but tightly coupled to SwiftUI's view lifecycle with `@Query` and environment objects. This makes it challenging to use in ViewModels, services, or business logic layers. SwiftDataKit solves this by:
 
-1. **Reducing Boilerplate**: No need to repeatedly configure `ModelContainer` and `ModelContext`
-2. **Type Safety**: Compile-time guarantees for your data operations
-3. **Flexibility**: Choose between manual control or reactive patterns based on your needs
-4. **Performance**: Built-in support for selective property fetching and relationship prefetching
-5. **Testability**: Easy to mock with protocol-based architecture
+1. **Breaking Free from SwiftUI Views**: Access your data from ViewModels, repositories, services, and any other non-UI code
+2. **Reducing Boilerplate**: No need to repeatedly configure `ModelContainer` and `ModelContext`
+3. **Type Safety**: Compile-time guarantees for your data operations
+4. **Flexibility**: Choose between manual control or reactive patterns based on your needs
+5. **Native SwiftUI Support**: Still works perfectly with `@Query`, `@Environment`, and SwiftUI's native patterns
+6. **Performance**: Built-in support for selective property fetching and relationship prefetching
+7. **Testability**: Easy to mock with protocol-based architecture
 
 ## Installation
 
@@ -209,11 +215,11 @@ class TodoViewModel: ObservableObject {
 
 ### Choosing the Right Store
 
-| Feature           | DataStore                    | ObservableDataStore    |
-| ----------------- | ---------------------------- | ---------------------- |
-| Automatic Updates | No                           | Yes                    |
-| Best For          | Custom logic, background ops | Real-time UI, lists    |
-| Use Case          | On-demand fetching           | Always-current data    |
+| Feature           | DataStore                    | ObservableDataStore |
+| ----------------- | ---------------------------- | ------------------- |
+| Automatic Updates | No                           | Yes                 |
+| Best For          | Custom logic, background ops | Real-time UI, lists |
+| Use Case          | On-demand fetching           | Always-current data |
 
 ### Supporting Types
 
@@ -329,6 +335,27 @@ struct ContentView: View {
             )
         } catch {
             print("Failed to fetch todos: \(error)")
+        }
+    }
+}
+```
+
+**Note:** You can also use native SwiftUI patterns like `@Query` alongside SwiftDataKit. The `.modelContainer()` modifier ensures both approaches work together:
+
+```swift
+struct ContentView: View {
+    // Native SwiftUI approach
+    @Query(sort: \.createdAt, order: .reverse) var todos: [Todo]
+
+    // SwiftDataKit approach in ViewModel
+    @StateObject private var viewModel = TodoViewModel()
+
+    var body: some View {
+        List {
+            // Both work seamlessly together
+            ForEach(todos) { todo in
+                TodoRow(todo: todo)
+            }
         }
     }
 }
