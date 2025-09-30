@@ -133,7 +133,7 @@ protocol ObservableDataRepository: DataRepository, Observable {
 
 SwiftDataKit provides two concrete implementations of the repository protocols, each serving different use cases.
 
-#### DataStore
+#### DataRepositoryStore
 
 A **manual** data store for explicit control over data fetching and state management.
 
@@ -155,7 +155,7 @@ A **manual** data store for explicit control over data fetching and state manage
 **Example:**
 
 ```swift
-let todoStore = DataStore<Todo>()
+let todoStore = DataRepositoryStore<Todo>()
 
 // Explicit fetch - you control when data is loaded
 let todos = try todoStore.fetch(
@@ -171,7 +171,7 @@ func loadData() {
 }
 ```
 
-#### ObservableDataStore
+#### ObservableDataRepositoryStore
 
 A **reactive** data store that automatically synchronizes with database changes.
 
@@ -196,7 +196,7 @@ A **reactive** data store that automatically synchronizes with database changes.
 @StateObject private var viewModel = TodoViewModel()
 
 class TodoViewModel: ObservableObject {
-    let store = ObservableDataStore<Todo>(
+    let store = ObservableDataRepositoryStore<Todo>(
         fetchConfiguration: FetchConfigrations(
             sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
             predicate: #Predicate { !$0.isCompleted },
@@ -215,11 +215,11 @@ class TodoViewModel: ObservableObject {
 
 ### Choosing the Right Store
 
-| Feature           | DataStore                    | ObservableDataStore |
-| ----------------- | ---------------------------- | ------------------- |
-| Automatic Updates | No                           | Yes                 |
-| Best For          | Custom logic, background ops | Real-time UI, lists |
-| Use Case          | On-demand fetching           | Always-current data |
+| Feature           | DataRepositoryStore          | ObservableDataRepositoryStore |
+| ----------------- | ---------------------------- | ----------------------------- |
+| Automatic Updates | No                           | Yes                           |
+| Best For          | Custom logic, background ops | Real-time UI, lists           |
+| Use Case          | On-demand fetching           | Always-current data           |
 
 ### Supporting Types
 
@@ -247,7 +247,7 @@ enum FetchOptions {
 
 #### FetchConfigrations
 
-Encapsulates all fetch parameters for `ObservableDataStore`:
+Encapsulates all fetch parameters for `ObservableDataRepositoryStore`:
 
 ```swift
 struct FetchConfigrations<Model: PersistentModel> {
@@ -309,14 +309,14 @@ struct MyApp: App {
 }
 ```
 
-### 3. Use DataStore
+### 3. Use DataRepositoryStore
 
 ```swift
 import SwiftUI
 import SwiftDataKit
 
 struct ContentView: View {
-    private let todoStore = DataStore<Todo>()
+    private let todoStore = DataRepositoryStore<Todo>()
     @State private var todos: [Todo] = []
 
     var body: some View {
@@ -365,12 +365,12 @@ struct ContentView: View {
 
 Now that you understand the architecture, let's see how to perform common data operations with both store types.
 
-### CRUD with DataStore
+### CRUD with DataRepositoryStore
 
 Manual control over all operations:
 
 ```swift
-let todoStore = DataStore<Todo>()
+let todoStore = DataRepositoryStore<Todo>()
 
 // CREATE: Add new items
 let todo = Todo(title: "Buy groceries", priority: .high)
@@ -416,13 +416,13 @@ let completedCount = try todoStore.fetchCount(
 )
 ```
 
-### CRUD with ObservableDataStore
+### CRUD with ObservableDataRepositoryStore
 
 Automatic synchronization with reactive updates:
 
 ```swift
 class TodoViewModel: ObservableObject {
-    let store = ObservableDataStore<Todo>(
+    let store = ObservableDataRepositoryStore<Todo>(
         fetchConfiguration: FetchConfigrations(
             sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
             predicate: nil,  // Fetch all
@@ -487,7 +487,7 @@ Fetch only the properties you need to reduce memory usage and improve performanc
 
 ```swift
 // Example: Fetch only titles and IDs for a list preview
-let todoStore = DataStore<Todo>()
+let todoStore = DataRepositoryStore<Todo>()
 
 let previews = try todoStore.fetch(
     propertiesToFetch: .custom([\Todo.id, \Todo.title, \Todo.isCompleted])
@@ -517,7 +517,7 @@ class Project {
     // ...
 }
 
-let projectStore = DataStore<Project>()
+let projectStore = DataRepositoryStore<Project>()
 
 // Prefetch relationships to avoid N+1 queries
 let projects = try projectStore.fetch(
@@ -541,7 +541,7 @@ for project in projects {
 Handle large datasets efficiently by loading data in chunks. Essential for maintaining performance with thousands of records.
 
 ```swift
-let todoStore = DataStore<Todo>()
+let todoStore = DataRepositoryStore<Todo>()
 let pageSize = 20
 
 // Load first page
@@ -558,7 +558,7 @@ let page2 = try todoStore.fetch(
 
 // Generic pagination function
 func fetchPage<T: PersistentModel>(
-    _ store: DataStore<T>,
+    _ store: DataRepositoryStore<T>,
     page: Int,
     pageSize: Int
 ) throws -> [T] {
@@ -573,7 +573,7 @@ func fetchPage<T: PersistentModel>(
 Build sophisticated filters using Swift's `#Predicate` macro:
 
 ```swift
-let todoStore = DataStore<Todo>()
+let todoStore = DataRepositoryStore<Todo>()
 
 // Multiple conditions
 let urgentTodos = try todoStore.fetch(
@@ -615,7 +615,7 @@ Perform intensive operations without blocking the UI thread. Each background con
 // Heavy import operation
 Task.detached {
     let backgroundContext = SwiftDataKit.shared.newBackgroundContext()
-    let backgroundStore = DataStore<Todo>(modelContext: backgroundContext)
+    let backgroundStore = DataRepositoryStore<Todo>(modelContext: backgroundContext)
 
     // Import thousands of items
     for i in 0..<10000 {
@@ -627,7 +627,7 @@ Task.detached {
 // Background processing with progress
 func importTodos(from items: [ImportItem]) async throws {
     let backgroundContext = SwiftDataKit.shared.newBackgroundContext()
-    let backgroundStore = DataStore<Todo>(modelContext: backgroundContext)
+    let backgroundStore = DataRepositoryStore<Todo>(modelContext: backgroundContext)
 
     for (index, item) in items.enumerated() {
         let todo = Todo(title: item.title, priority: item.priority)
@@ -695,7 +695,7 @@ SwiftDataKit makes testing easy with in-memory configurations:
 
 ```swift
 class TodoServiceTests: XCTestCase {
-    var testStore: DataStore<Todo>!
+    var testStore: DataRepositoryStore<Todo>!
 
     override func setUp() {
         super.setUp()
@@ -706,7 +706,7 @@ class TodoServiceTests: XCTestCase {
             config: ModelConfiguration(isStoredInMemoryOnly: true)
         )
 
-        testStore = DataStore<Todo>()
+        testStore = DataRepositoryStore<Todo>()
     }
 
     override func tearDown() {
@@ -738,7 +738,7 @@ protocol TodoRepository {
 }
 
 class TodoRepositoryImpl: TodoRepository {
-    private let store = DataStore<Todo>()
+    private let store = DataRepositoryStore<Todo>()
 
     func getAllTodos() async throws -> [Todo] {
         try store.fetch(
@@ -768,7 +768,7 @@ class TodoRepositoryImpl: TodoRepository {
 ```swift
 @MainActor
 class TodoListViewModel: ObservableObject {
-    private let store = ObservableDataStore<Todo>(
+    private let store = ObservableDataRepositoryStore<Todo>(
         fetchConfiguration: .default
     )
 
@@ -837,7 +837,7 @@ let config = FetchConfigrations<Todo>(
     fetchOptions: .paging(offset: 0, limit: 50)
 )
 
-let store = ObservableDataStore<Todo>(fetchConfiguration: config)
+let store = ObservableDataRepositoryStore<Todo>(fetchConfiguration: config)
 ```
 
 ## Performance Tips
