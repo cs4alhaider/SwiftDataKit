@@ -8,10 +8,10 @@
 import Foundation
 import SwiftData
 
-/// Configuration for data fetching in `ObservableDataStore`.
+/// Configuration for data fetching in `ObservableDataRepositoryStore`.
 ///
 /// This struct encapsulates all the parameters needed to configure how data is fetched
-/// and kept in sync in an observable data store. It's used by `ObservableDataStore` to
+/// and kept in sync in an observable data store. It's used by `ObservableDataRepositoryStore` to
 /// determine sorting, filtering, property selection, and pagination behavior.
 ///
 /// ## Overview
@@ -39,13 +39,13 @@ import SwiftData
 ///     fetchOptions: .paging(offset: 0, limit: 50)
 /// )
 ///
-/// // Use with ObservableDataStore
-/// let store = ObservableDataStore<Todo>(
+/// // Use with ObservableDataRepositoryStore
+/// let store = ObservableDataRepositoryStore<Todo>(
 ///     fetchConfiguration: priorityConfig
 /// )
 /// ```
 ///
-/// - Note: This configuration is immutable once set in `ObservableDataStore`.
+/// - Note: This configuration is immutable once set in `ObservableDataRepositoryStore`.
 ///         The store's `fetchConfiguration` property is marked as `let`.
 ///
 public struct FetchConfigrations<Model: PersistentModel> {
@@ -160,7 +160,7 @@ extension FetchConfigrations {
     ///
     /// Example:
     /// ```swift
-    /// let store = ObservableDataStore<Todo>(
+    /// let store = ObservableDataRepositoryStore<Todo>(
     ///     fetchConfiguration: .default
     /// )
     /// ```

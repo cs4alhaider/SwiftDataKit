@@ -12,7 +12,7 @@ import SwiftData
 
 /// Shared sorting configuration used across all Todo views for consistency.
 ///
-/// This ensures that all three view types (Native, Observable, and Manual DataStore)
+/// This ensures that all three view types (Native, Observable, and Manual DataRepositoryStore)
 /// display todos in the same order.
 ///
 /// ## Current Configuration

@@ -7,10 +7,10 @@
 
 import SwiftUI
 
-/// This view demonstrates using the DataStore with auto-fetch enabled.
+/// This view demonstrates using the ObservableDataRepositoryStore with auto-fetch enabled.
 /// The todos are automatically kept in sync through the items property.
 struct ObservableTodoListView: View {
-    @Environment(\.observableTodos) private var todosStore: ObservableDataStore<Todo>
+    @Environment(\.observableTodos) private var todosStore: ObservableDataRepositoryStore<Todo>
     @State private var showingAddSheet = false
     @State private var selectedTodo: Todo?
 
@@ -109,7 +109,7 @@ struct ObservableTodoListView: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                // Info banner showing this uses Observable DataStore
+                // Info banner showing this uses ObservableDataRepositoryStore
                 HStack {
                     Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
                         .foregroundColor(.green)

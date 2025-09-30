@@ -29,32 +29,41 @@ struct SettingsView: View {
 
                 Section("Data Access Methods") {
                     VStack(alignment: .leading, spacing: 12) {
-                        Label("Manual DataStore", systemImage: "hand.tap")
+                        Label("Manual DataRepositoryStore", systemImage: "hand.tap")
                             .font(.headline)
-                        Text("• Manual fetch() calls required\n• Full control over when data loads\n• Good for on-demand fetching")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 28)
+                        Text(
+                            "• Manual fetch() calls required\n• Full control over when data loads\n• Good for on-demand fetching"
+                        )
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 28)
                     }
                     .padding(.vertical, 4)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        Label("Observable DataStore", systemImage: "arrow.triangle.2.circlepath")
-                            .font(.headline)
-                        Text("• Auto-syncs via ModelContext.didSave\n• Uses fetchConfiguration\n• Items property always up-to-date\n• Best for reactive UIs")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 28)
+                        Label(
+                            "Observable DataRepositoryStore",
+                            systemImage: "arrow.triangle.2.circlepath"
+                        )
+                        .font(.headline)
+                        Text(
+                            "• Auto-syncs via ModelContext.didSave\n• Uses fetchConfiguration\n• Items property always up-to-date\n• Best for reactive UIs"
+                        )
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 28)
                     }
                     .padding(.vertical, 4)
 
                     VStack(alignment: .leading, spacing: 12) {
                         Label("Native SwiftUI", systemImage: "swiftdata")
                             .font(.headline)
-                        Text("• Uses @Query macro directly\n• Automatic view updates\n• Direct ModelContext access\n• Simpler for basic CRUD operations")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 28)
+                        Text(
+                            "• Uses @Query macro directly\n• Automatic view updates\n• Direct ModelContext access\n• Simpler for basic CRUD operations"
+                        )
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 28)
                     }
                     .padding(.vertical, 4)
                 }
@@ -64,9 +73,11 @@ struct SettingsView: View {
                         Text("Both approaches work because:")
                             .font(.caption)
                             .fontWeight(.semibold)
-                        Text("• SwiftDataKit.shared provides the ModelContainer\n• ModelContainer is injected at app level\n• Both views access the same data store\n• Changes in one view appear in the other")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Text(
+                            "• SwiftDataKit.shared provides the ModelContainer\n• ModelContainer is injected at app level\n• Both views access the same data store\n• Changes in one view appear in the other"
+                        )
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     }
                     .padding(.vertical, 4)
                 }

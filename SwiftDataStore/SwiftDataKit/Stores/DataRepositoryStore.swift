@@ -1,5 +1,5 @@
 //
-//  DataStore.swift
+//  DataRepositoryStore.swift
 //  SwiftDataStore
 //
 //  Created by Abdullah Alhaider on 23/09/2025.
@@ -8,11 +8,11 @@
 import Foundation
 import SwiftData
 
-// MARK: - DataStore Implementation
+// MARK: - DataRepositoryStore Implementation
 
 /// A generic data store for managing persistent model objects using SwiftData.
 ///
-/// `DataStore` provides a type-safe interface for CRUD operations on any `PersistentModel` type.
+/// `DataRepositoryStore` provides a type-safe interface for CRUD operations on any `PersistentModel` type.
 /// It uses the shared `SwiftDataKit` instance to access the underlying model context.
 ///
 /// ## Overview
@@ -24,7 +24,7 @@ import SwiftData
 ///
 /// ## Usage Example
 /// ```swift
-/// let todoStore = DataStore<Todo>()
+/// let todoStore = DataRepositoryStore<Todo>()
 ///
 /// // Create a new todo
 /// let todo = Todo(title: "Buy groceries")
@@ -37,7 +37,7 @@ import SwiftData
 /// )
 /// ```
 ///
-public struct DataStore<T>: DataRepository where T: PersistentModel {
+public struct DataRepositoryStore<T>: DataRepository where T: PersistentModel {
 
     // MARK: - Properties
 
@@ -47,13 +47,13 @@ public struct DataStore<T>: DataRepository where T: PersistentModel {
 
     // MARK: - Initialization
 
-    /// Initializes a new DataStore instance.
+    /// Initializes a new DataRepositoryStore instance.
     ///
     /// The store automatically uses the shared SwiftDataKit's model context,
-    /// which must be configured before creating any DataStore instances.
+    /// which must be configured before creating any DataRepositoryStore instances.
     ///
     /// - Note: Ensure `SwiftDataKit.configure()` has been called at app startup
-    ///         before creating DataStore instances.
+    ///         before creating DataRepositoryStore instances.
     public init(modelContext: ModelContext? = nil) {
         self.modelContext = modelContext ?? SwiftDataKit.shared.modelContext
     }
@@ -67,7 +67,7 @@ public struct DataStore<T>: DataRepository where T: PersistentModel {
     ///
     /// - Parameter item: The model object to be created.
     ///
-    /// - Throws: `DataStoreError.saveFailed` if the create operation fails.
+    /// - Throws: An error if the create operation fails.
     ///
     /// - Example:
     ///   ```swift
@@ -202,7 +202,7 @@ public struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   - item: The model object to update.
     ///   - updates: A closure that receives the item and applies changes to it.
     ///
-    /// - Throws: `DataStoreError.saveFailed` if the save operation fails.
+    /// - Throws: An error if the save operation fails.
     ///
     /// - Example:
     ///   ```swift
@@ -235,7 +235,7 @@ public struct DataStore<T>: DataRepository where T: PersistentModel {
     ///
     /// - Parameter item: The model object to delete.
     ///
-    /// - Throws: `DataStoreError.saveFailed` if the delete operation fails.
+    /// - Throws: An error if the delete operation fails.
     ///
     /// - Example:
     ///   ```swift
@@ -254,7 +254,7 @@ public struct DataStore<T>: DataRepository where T: PersistentModel {
     /// - Parameter predicate: Optional predicate to filter items to delete.
     ///                       If nil, all items are deleted.
     ///
-    /// - Throws: `DataStoreError.saveFailed` if the delete operation fails.
+    /// - Throws: An error if the delete operation fails.
     ///
     /// - Example:
     ///   ```swift

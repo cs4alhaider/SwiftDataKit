@@ -1,5 +1,5 @@
 //
-//  ObservableDataStore.swift
+//  ObservableDataRepositoryStore.swift
 //  SwiftDataStore
 //
 //  Created by Abdullah Alhaider on 30/09/2025.
@@ -9,11 +9,11 @@ import Combine
 import Foundation
 import SwiftData
 
-// MARK: - DataStore Implementation
+// MARK: - ObservableDataRepositoryStore Implementation
 
-/// A generic data store for managing persistent model objects using SwiftData.
+/// A generic observable data store for managing persistent model objects using SwiftData.
 ///
-/// `DataStore` provides a type-safe interface for CRUD operations on any `PersistentModel` type.
+/// `ObservableDataRepositoryStore` provides a type-safe interface for CRUD operations on any `PersistentModel` type.
 /// It uses the shared `SwiftDataKit` instance to access the underlying model context.
 ///
 /// ## Overview
@@ -25,7 +25,7 @@ import SwiftData
 ///
 /// ## Usage Example
 /// ```swift
-/// let todoStore = DataStore<Todo>()
+/// let todoStore = ObservableDataRepositoryStore<Todo>()
 ///
 /// // Create a new todo
 /// let todo = Todo(title: "Buy groceries")
@@ -43,7 +43,7 @@ import SwiftData
 /// For background operations, use `SwiftDataKit.shared.newBackgroundContext()`.
 ///
 @MainActor
-public final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository
+public final class ObservableDataRepositoryStore<T>: ObservableObject, ObservableDataRepository
 where T: PersistentModel {
 
     // MARK: - Public Properties
@@ -65,7 +65,7 @@ where T: PersistentModel {
 
     // MARK: - Initialization
 
-    /// Initializes a new DataStore instance.
+    /// Initializes a new ObservableDataRepositoryStore instance.
     ///
     /// The store automatically uses the shared SwiftDataKit's model context,
     /// which must be configured before creating any DataStore instances.
@@ -75,7 +75,7 @@ where T: PersistentModel {
     ///   - fetchConfiguration: Configuration for automatic fetching and updates
     ///
     /// - Note: Ensure `SwiftDataKit.configure()` has been called at app startup
-    ///         before creating DataStore instances.
+    ///         before creating ObservableDataRepositoryStore instances.
     public init(
         modelContext: ModelContext? = nil, fetchConfiguration: FetchConfigrations<T> = .default
     ) {
