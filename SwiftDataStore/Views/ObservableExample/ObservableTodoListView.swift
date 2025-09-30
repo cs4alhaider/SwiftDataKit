@@ -164,7 +164,7 @@ struct ObservableTodoListView: View {
         }
     }
 }
-//
-//#Preview {
-//    ObservableTodoListView()
-//}
+
+#Preview {
+    ObservableTodoListView()
+}
