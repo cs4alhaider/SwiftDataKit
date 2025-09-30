@@ -12,7 +12,7 @@ extension EnvironmentValues {
     /// Automatically updates when the ModelContext changes
     @Entry var observableTodos: ObservableDataStore<Todo> = .init(
         fetchConfiguration: FetchConfigrations(
-            sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
+            sortDescriptors: TodoSortConfiguration.standard,
             predicate: nil,
             propertiesToFetch: .all,
             relationshipKeyPathsForPrefetching: nil,

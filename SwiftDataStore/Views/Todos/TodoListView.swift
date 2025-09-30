@@ -28,16 +28,20 @@ struct TodoListView: View {
                 if !activeTodos.isEmpty {
                     Section("Active") {
                         ForEach(activeTodos, id: \.persistentModelID) { todo in
-                            TodoRow(todo: todo, onToggle: {
-                                toggleTodo(todo)
-                            })
+                            TodoRow(
+                                todo: todo,
+                                onToggle: {
+                                    toggleTodo(todo)
+                                }
+                            )
                             .onTapGesture {
                                 selectedTodo = todo
                             }
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .top).combined(with: .opacity),
-                                removal: .move(edge: .bottom).combined(with: .opacity)
-                            ))
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .bottom).combined(with: .opacity)
+                                ))
                         }
                         .onDelete(perform: deleteActiveTodos)
                     }
@@ -47,17 +51,21 @@ struct TodoListView: View {
                 if !completedTodos.isEmpty {
                     Section("Completed") {
                         ForEach(completedTodos, id: \.persistentModelID) { todo in
-                            TodoRow(todo: todo, onToggle: {
-                                toggleTodo(todo)
-                            })
+                            TodoRow(
+                                todo: todo,
+                                onToggle: {
+                                    toggleTodo(todo)
+                                }
+                            )
                             .opacity(0.6)
                             .onTapGesture {
                                 selectedTodo = todo
                             }
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .top).combined(with: .opacity),
-                                removal: .move(edge: .bottom).combined(with: .opacity)
-                            ))
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .bottom).combined(with: .opacity)
+                                ))
                         }
                         .onDelete(perform: deleteCompletedTodos)
                     }
@@ -107,7 +115,7 @@ struct TodoListView: View {
         do {
             let now = Date.now
             todos = try todosStore.fetch(
-                sortedBy: [SortDescriptor(\.createdAt, order: .reverse)],
+                sortedBy: TodoSortConfiguration.standard,
                 predicate: #Predicate { todo in
                     // todo.isCompleted == true
                     todo.createdAt < now
@@ -124,7 +132,7 @@ struct TodoListView: View {
             try todosStore.update(todo) { item in
                 item.isCompleted.toggle()
             }
-//            loadTodos()
+            //            loadTodos()
         } catch {
             print("Error updating todo: \(error)")
         }

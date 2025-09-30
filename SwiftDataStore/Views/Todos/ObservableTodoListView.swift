@@ -10,7 +10,7 @@ import SwiftUI
 /// This view demonstrates using the DataStore with auto-fetch enabled.
 /// The todos are automatically kept in sync through the items property.
 struct ObservableTodoListView: View {
-    @State private var todosStore: ObservableDataStore<Todo> = .init()
+    @Environment(\.observableTodos) private var todosStore: ObservableDataStore<Todo>
     @State private var showingAddSheet = false
     @State private var selectedTodo: Todo?
 
