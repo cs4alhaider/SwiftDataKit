@@ -61,21 +61,7 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
     private var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
 
     /// Current fetch configuration for auto-fetching
-    private var currentFetchConfiguration: FetchConfiguration?
-
-    // MARK: - Types
-
-    /// Configuration for automatic fetching
-    enum FetchConfiguration {
-        case none
-        case enabled(
-            sortDescriptors: [SortDescriptor<T>] = [],
-            predicate: Predicate<T>? = nil,
-            propertiesToFetch: PropertiesOption<T> = .all,
-            relationshipKeyPathsForPrefetching: [PartialKeyPath<T>]? = nil,
-            fetchOptions: FetchOptions = .all
-        )
-    }
+    private let fetchConfiguration: FetchConfigrations<T>
 
     // MARK: - Initialization
 
@@ -86,34 +72,30 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
     ///
     /// - Parameters:
     ///   - modelContext: Optional custom ModelContext. If nil, uses SwiftDataKit.shared.modelContext
-    ///   - fetchConfiguration: Configuration for automatic fetching. Use .enabled to auto-fetch items
+    ///   - fetchConfiguration: Configuration for automatic fetching and updates
     ///
     /// - Note: Ensure `SwiftDataKit.configure()` has been called at app startup
     ///         before creating DataStore instances.
-    init(modelContext: ModelContext? = nil, fetchConfiguration: FetchConfiguration = .none) {
+    init(modelContext: ModelContext? = nil, fetchConfiguration: FetchConfigrations<T> = .default) {
         self.modelContext = modelContext ?? SwiftDataKit.shared.modelContext
-        self.currentFetchConfiguration = fetchConfiguration
+        self.fetchConfiguration = fetchConfiguration
 
         // Setup notification listeners
         setupNotificationListeners()
 
-        // Perform initial fetch if configuration is enabled
-        if case .enabled(
-            let sortDescriptors, let predicate, let propertiesToFetch,
-            let relationshipKeyPathsForPrefetching, let fetchOptions) = fetchConfiguration
-        {
-            do {
-                self.items = try fetch(
-                    sortedBy: sortDescriptors,
-                    predicate: predicate,
-                    propertiesToFetch: propertiesToFetch,
-                    relationshipKeyPathsForPrefetching: relationshipKeyPathsForPrefetching,
-                    fetchOptions: fetchOptions
-                )
-            } catch {
-                print("Error performing initial fetch: \(error)")
-                self.items = []
-            }
+        // Perform initial fetch
+        do {
+            self.items = try fetch(
+                sortedBy: fetchConfiguration.sortDescriptors,
+                predicate: fetchConfiguration.predicate,
+                propertiesToFetch: fetchConfiguration.propertiesToFetch,
+                relationshipKeyPathsForPrefetching: fetchConfiguration
+                    .relationshipKeyPathsForPrefetching,
+                fetchOptions: fetchConfiguration.fetchOptions
+            )
+        } catch {
+            print("Error performing initial fetch: \(error)")
+            self.items = []
         }
     }
 
@@ -138,93 +120,32 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
         // This ensures updates from Native view are reflected here
         guard notification.object is ModelContext else { return }
 
-        // For enabled configuration, always re-fetch when any save occurs
+        // Always re-fetch when any save occurs to keep items in sync
         // This ensures we catch all updates, even when userInfo is incomplete
-        if case .enabled = currentFetchConfiguration {
-            // Check if this context has any registered objects of our type
-            // If yes, perform auto-fetch to get the latest state
-            performAutoFetch()
-        } else if case .none? = currentFetchConfiguration {
-            // For .none configuration, try to manually update based on notification
-            if let userInfo = notification.userInfo {
-                let inserted = (userInfo["inserted"] as? Set<PersistentIdentifier>) ?? []
-                let deleted = (userInfo["deleted"] as? Set<PersistentIdentifier>) ?? []
-                let updated = (userInfo["updated"] as? Set<PersistentIdentifier>) ?? []
-
-                if !updated.isEmpty {
-                    print(updated)
-                }
-
-                if !inserted.isEmpty || !deleted.isEmpty || !updated.isEmpty {
-                    updateItemsFromNotification(notification)
-                }
-            }
-        }
-    }
-
-    /// Updates items array based on notification changes (for .none configuration)
-    private func updateItemsFromNotification(_ notification: Notification) {
-        guard let userInfo = notification.userInfo else { return }
-
-        let inserted = (userInfo["inserted"] as? Set<PersistentIdentifier>) ?? []
-        let deleted = (userInfo["deleted"] as? Set<PersistentIdentifier>) ?? []
-        let updated = (userInfo["updated"] as? Set<PersistentIdentifier>) ?? []
-        if !updated.isEmpty {
-            print(updated)
-        }
-        // Remove deleted items
-        if !deleted.isEmpty {
-            items.removeAll { (item: T) in
-                deleted.contains(item.persistentModelID)
-            }
-        }
-
-        // Add inserted items
-        for identifier in inserted {
-            if let model: T = modelContext.registeredModel(for: identifier) {
-                // Check if item already exists (to avoid duplicates)
-                if !items.contains(where: { $0.persistentModelID == identifier }) {
-                    items.append(model)
-                }
-            }
-        }
-
-        // Update existing items (they're already updated in memory due to SwiftData's behavior)
-        // We just need to trigger the @Observable update
-        if !updated.isEmpty {
-            // Force a refresh by creating a new array
-            items = items.map { $0 }
-        }
+        performAutoFetch()
     }
 
     /// Performs automatic fetch based on current configuration
     private func performAutoFetch() {
-        guard
-            case .enabled(
-                let sortDescriptors, let predicate, let propertiesToFetch,
-                let relationshipKeyPathsForPrefetching, let fetchOptions) =
-                currentFetchConfiguration
-        else {
-            return
-        }
-
         do {
             // Directly fetch from context to avoid recursion
             var fetchRequest: FetchDescriptor<T> = FetchDescriptor<T>(
-                predicate: predicate,
-                sortBy: sortDescriptors
+                predicate: fetchConfiguration.predicate,
+                sortBy: fetchConfiguration.sortDescriptors
             )
 
-            if case .paging(let offset, let limit) = fetchOptions {
+            if case .paging(let offset, let limit) = fetchConfiguration.fetchOptions {
                 fetchRequest.fetchOffset = offset
                 fetchRequest.fetchLimit = limit
             }
 
-            if case .custom(let properties) = propertiesToFetch {
+            if case .custom(let properties) = fetchConfiguration.propertiesToFetch {
                 fetchRequest.propertiesToFetch = properties
             }
 
-            if let relationshipKeyPathsForPrefetching {
+            if let relationshipKeyPathsForPrefetching = fetchConfiguration
+                .relationshipKeyPathsForPrefetching
+            {
                 fetchRequest.relationshipKeyPathsForPrefetching = relationshipKeyPathsForPrefetching
             }
 
@@ -233,18 +154,6 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
             self.items = fetchedItems
         } catch {
             print("Error performing auto-fetch: \(error)")
-        }
-    }
-
-    /// Updates the fetch configuration and refreshes items
-    public func updateFetchConfiguration(_ configuration: FetchConfiguration) {
-        self.currentFetchConfiguration = configuration
-
-        if case .enabled = configuration {
-            performAutoFetch()
-        } else {
-            // Clear items if switching to .none
-            items = []
         }
     }
 
@@ -267,12 +176,7 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
     func create(_ item: T) throws {
         modelContext.insert(item)
         try modelContext.save()
-
-        // If fetchConfiguration is .none, manually add to items
-        if case .none? = currentFetchConfiguration {
-            items.append(item)
-        }
-        // If .enabled, the didSave notification will trigger auto-fetch
+        // The didSave notification will trigger auto-fetch
     }
 
     // MARK: - Public Methods - Read
@@ -343,14 +247,7 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
             fetchRequest.relationshipKeyPathsForPrefetching = relationshipKeyPathsForPrefetching
         }
 
-        let fetchedItems = try modelContext.fetch(fetchRequest)
-
-        // Update items array if fetchConfiguration is .none
-        if case .none? = currentFetchConfiguration {
-            self.items = fetchedItems
-        }
-
-        return fetchedItems
+        return try modelContext.fetch(fetchRequest)
     }
 
     /// Fetches a single item by its persistent identifier.
@@ -453,12 +350,7 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
     func delete(_ item: T) throws {
         modelContext.delete(item)
         try modelContext.save()
-
-        // If fetchConfiguration is .none, manually remove from items
-        if case .none? = currentFetchConfiguration {
-            items.removeAll { $0.persistentModelID == item.persistentModelID }
-        }
-        // If .enabled, the didSave notification will trigger auto-fetch
+        // The didSave notification will trigger auto-fetch
     }
 
     /// Deletes all items matching the given predicate.
@@ -486,18 +378,7 @@ final class ObservableDataStore<T>: ObservableDataRepository where T: Persistent
     func deleteAll(where predicate: Predicate<T>? = nil) throws {
         try modelContext.delete(model: T.self, where: predicate)
         try modelContext.save()
-
-        // If fetchConfiguration is .none, clear items or filter based on predicate
-        if case .none? = currentFetchConfiguration {
-            if predicate == nil {
-                items = []
-            } else {
-                // Note: We can't evaluate the predicate directly on the items array
-                // So we clear all items and rely on a manual fetch if needed
-                items = []
-            }
-        }
-        // If .enabled, the didSave notification will trigger auto-fetch
+        // The didSave notification will trigger auto-fetch
     }
 }
 
@@ -513,7 +394,7 @@ class ObservableDataStoreUsageExamples {
 
     // Create a store instance for Todo model with auto-fetch enabled
     let todoStore = ObservableDataStore<Todo>(
-        fetchConfiguration: .enabled(
+        fetchConfiguration: FetchConfigrations(
             sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
             predicate: nil,
             propertiesToFetch: .all,
