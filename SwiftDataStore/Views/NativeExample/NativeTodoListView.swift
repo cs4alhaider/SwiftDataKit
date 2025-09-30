@@ -5,8 +5,8 @@
 //  Created by Abdullah Alhaider on 29/09/2025.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 /// This view demonstrates using native SwiftUI @Query to fetch todos
 /// instead of using the DataStore. Both approaches work because we've
@@ -35,12 +35,22 @@ struct NativeTodoListView: View {
             List {
                 // Active Todos Section
                 if !activeTodos.isEmpty {
-                    Section("Active") {
-                        ForEach(activeTodos) { todo in
-                            NativeTodoRow(todo: todo, modelContext: modelContext)
-                                .onTapGesture {
-                                    selectedTodo = todo
+                    Section("Active (\(activeTodos.count))") {
+                        ForEach(activeTodos, id: \.persistentModelID) { todo in
+                            TodoRow(
+                                todo: todo,
+                                onToggle: {
+                                    toggleTodo(todo)
                                 }
+                            )
+                            .onTapGesture {
+                                selectedTodo = todo
+                            }
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .bottom).combined(with: .opacity)
+                                ))
                         }
                         .onDelete(perform: deleteActiveTodos)
                     }
@@ -48,13 +58,23 @@ struct NativeTodoListView: View {
 
                 // Completed Todos Section
                 if !completedTodos.isEmpty {
-                    Section("Completed") {
-                        ForEach(completedTodos) { todo in
-                            NativeTodoRow(todo: todo, modelContext: modelContext)
-                                .opacity(0.6)
-                                .onTapGesture {
-                                    selectedTodo = todo
+                    Section("Completed (\(completedTodos.count))") {
+                        ForEach(completedTodos, id: \.persistentModelID) { todo in
+                            TodoRow(
+                                todo: todo,
+                                onToggle: {
+                                    toggleTodo(todo)
                                 }
+                            )
+                            .opacity(0.6)
+                            .onTapGesture {
+                                selectedTodo = todo
+                            }
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .bottom).combined(with: .opacity)
+                                ))
                         }
                         .onDelete(perform: deleteCompletedTodos)
                     }
@@ -69,6 +89,7 @@ struct NativeTodoListView: View {
                     )
                 }
             }
+            .animation(.default, value: todos)
             .navigationTitle("Native SwiftUI")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -77,6 +98,12 @@ struct NativeTodoListView: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
                     }
+                }
+
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Text("Total: \(todos.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
             .sheet(isPresented: $showingAddSheet) {
@@ -102,7 +129,19 @@ struct NativeTodoListView: View {
         }
     }
 
-    // MARK: - Delete Functions using Native ModelContext
+    // MARK: - Helper Functions
+
+    private func toggleTodo(_ todo: Todo) {
+        todo.isCompleted.toggle()
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Error toggling todo: \(error)")
+        }
+    }
+
+    // MARK: - Delete Functions
 
     private func deleteActiveTodos(at offsets: IndexSet) {
         for index: IndexSet.Element in offsets {
@@ -127,53 +166,6 @@ struct NativeTodoListView: View {
             try modelContext.save()
         } catch {
             print("Error deleting completed todos: \(error)")
-        }
-    }
-}
-
-// MARK: - Native Todo Row
-
-struct NativeTodoRow: View {
-    let todo: Todo
-    let modelContext: ModelContext
-
-    var body: some View {
-        HStack {
-            Button(action: toggleCompletion) {
-                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(todo.isCompleted ? .green : .gray)
-                    .font(.title3)
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(todo.title)
-                    .strikethrough(todo.isCompleted)
-                    .foregroundColor(todo.isCompleted ? .secondary : .primary)
-
-                HStack(spacing: 8) {
-                    Label(todo.priority.text, systemImage: todo.priority.icon)
-                        .font(.caption)
-                        .foregroundColor(todo.priority.color)
-
-                    Text(todo.createdAt.relativeTime())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            Spacer()
-        }
-        .contentShape(Rectangle())
-    }
-
-    private func toggleCompletion() {
-        todo.isCompleted.toggle()
-
-        do {
-            try modelContext.save()
-        } catch {
-            print("Error toggling todo: \(error)")
         }
     }
 }

@@ -26,7 +26,7 @@ struct TodoListView: View {
             List {
                 // Active Todos Section
                 if !activeTodos.isEmpty {
-                    Section("Active") {
+                    Section("Active (\(activeTodos.count))") {
                         ForEach(activeTodos, id: \.persistentModelID) { todo in
                             TodoRow(
                                 todo: todo,
@@ -49,7 +49,7 @@ struct TodoListView: View {
 
                 // Completed Todos Section
                 if !completedTodos.isEmpty {
-                    Section("Completed") {
+                    Section("Completed (\(completedTodos.count))") {
                         ForEach(completedTodos, id: \.persistentModelID) { todo in
                             TodoRow(
                                 todo: todo,
@@ -88,6 +88,12 @@ struct TodoListView: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
                     }
+                }
+
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Text("Total: \(todos.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
             .onAppear {
