@@ -43,13 +43,12 @@ import SwiftData
 /// For background operations, use `SwiftDataKit.shared.newBackgroundContext()`.
 ///
 @MainActor
-@Observable
-final class ObservableDataStore<T>: ObservableDataRepository where T: PersistentModel {
+final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository where T: PersistentModel {
 
     // MARK: - Public Properties
 
     /// The current items in the store, automatically updated when the ModelContext changes
-    public internal(set) var items: [T] = []
+    @Published public internal(set) var items: [T] = []
 
     // MARK: - Private Properties
 
