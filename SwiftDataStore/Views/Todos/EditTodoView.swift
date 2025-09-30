@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditTodoView: View {
-    let todosStore: DataStore<Todo>
+    let todosStore: any StoreProtocol<Todo>
     let todo: Todo
     let onSave: () -> Void
 
@@ -17,7 +17,7 @@ struct EditTodoView: View {
     @State private var priority: Priority
     @State private var isCompleted: Bool
 
-    init(todosStore: DataStore<Todo>, todo: Todo, onSave: @escaping () -> Void) {
+    init(todosStore: any StoreProtocol<Todo>, todo: Todo, onSave: @escaping () -> Void) {
         self.todosStore = todosStore
         self.todo = todo
         self.onSave = onSave

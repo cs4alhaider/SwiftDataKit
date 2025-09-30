@@ -14,21 +14,27 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             TodoListView()
                 .tabItem {
-                    Label("DataStore", systemImage: "shippingbox")
+                    Label("Manual", systemImage: "hand.tap")
                 }
                 .tag(0)
+
+            ObservableTodoListView()
+                .tabItem {
+                    Label("Observable", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .tag(1)
 
             NativeTodoListView()
                 .tabItem {
                     Label("Native", systemImage: "swiftdata")
                 }
-                .tag(1)
+                .tag(2)
 
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
-                .tag(2)
+                .tag(3)
         }
     }
 }

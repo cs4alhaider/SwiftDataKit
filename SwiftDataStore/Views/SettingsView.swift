@@ -29,9 +29,9 @@ struct SettingsView: View {
 
                 Section("Data Access Methods") {
                     VStack(alignment: .leading, spacing: 12) {
-                        Label("DataStore Approach", systemImage: "shippingbox")
+                        Label("Manual DataStore", systemImage: "hand.tap")
                             .font(.headline)
-                        Text("• Uses custom DataStore wrapper\n• Provides additional abstractions\n• Error handling with DataStoreError\n• Supports pagination and custom fetch options")
+                        Text("• Manual fetch() calls required\n• Full control over when data loads\n• Good for on-demand fetching")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .padding(.leading, 28)
@@ -39,7 +39,17 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        Label("Native SwiftUI Approach", systemImage: "swiftdata")
+                        Label("Observable DataStore", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.headline)
+                        Text("• Auto-syncs via ModelContext.didSave\n• Uses fetchConfiguration\n• Items property always up-to-date\n• Best for reactive UIs")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.leading, 28)
+                    }
+                    .padding(.vertical, 4)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label("Native SwiftUI", systemImage: "swiftdata")
                             .font(.headline)
                         Text("• Uses @Query macro directly\n• Automatic view updates\n• Direct ModelContext access\n• Simpler for basic CRUD operations")
                             .font(.caption)
