@@ -93,7 +93,7 @@ struct ObservableTodoListView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Text("Total: \(todosStore.items.count)")
+                    Text("\(todosStore.items.count)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

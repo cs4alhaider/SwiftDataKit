@@ -91,7 +91,7 @@ struct TodoListView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Text("Total: \(todos.count)")
+                    Text("\(todos.count)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
