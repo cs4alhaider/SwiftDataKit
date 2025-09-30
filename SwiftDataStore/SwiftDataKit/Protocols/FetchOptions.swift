@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 /// Enum to define the fetch options
-enum FetchOptions {
+public enum FetchOptions {
     /// Fetch all items
     case all
     /// Fetch items with pagination

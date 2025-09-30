@@ -43,7 +43,8 @@ import SwiftData
 /// For background operations, use `SwiftDataKit.shared.newBackgroundContext()`.
 ///
 @MainActor
-final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository where T: PersistentModel {
+public final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository
+where T: PersistentModel {
 
     // MARK: - Public Properties
 
@@ -75,7 +76,9 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///
     /// - Note: Ensure `SwiftDataKit.configure()` has been called at app startup
     ///         before creating DataStore instances.
-    init(modelContext: ModelContext? = nil, fetchConfiguration: FetchConfigrations<T> = .default) {
+    public init(
+        modelContext: ModelContext? = nil, fetchConfiguration: FetchConfigrations<T> = .default
+    ) {
         self.modelContext = modelContext ?? SwiftDataKit.shared.modelContext
         self.fetchConfiguration = fetchConfiguration
 
@@ -172,7 +175,7 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///   let newTodo = Todo(title: "Write documentation")
     ///   try todoStore.create(newTodo)
     ///   ```
-    func create(_ item: T) throws {
+    public func create(_ item: T) throws {
         modelContext.insert(item)
         try modelContext.save()
         // The didSave notification will trigger auto-fetch
@@ -218,7 +221,7 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     /// - SeeAlso:
     ///   - https://developer.apple.com/documentation/swiftdata/fetchdescriptor
     ///   - https://www.hackingwithswift.com/quick-start/swiftdata/how-to-create-a-custom-fetchdescriptor
-    func fetch(
+    public func fetch(
         sortedBy sortDescriptors: [SortDescriptor<T>] = [],
         predicate: Predicate<T>? = nil,
         propertiesToFetch: PropertiesOption<T> = .all,
@@ -266,7 +269,7 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///   ```
     ///
     /// - SeeAlso: https://www.hackingwithswift.com/quick-start/swiftdata/how-to-find-a-swiftdata-object-by-its-identifier
-    func fetch(id: PersistentIdentifier) throws -> T? {
+    public func fetch(id: PersistentIdentifier) throws -> T? {
         modelContext.registeredModel(for: id)
     }
 
@@ -288,7 +291,7 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///   )
     ///   print("Completed todos: \(completedCount)")
     ///   ```
-    func fetchCount(predicate: Predicate<T>? = nil) throws -> Int {
+    public func fetchCount(predicate: Predicate<T>? = nil) throws -> Int {
         let fetchRequest: FetchDescriptor<T> = FetchDescriptor<T>(
             predicate: predicate
         )
@@ -318,7 +321,7 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///   ```
     ///
     /// - Note: The item is automatically inserted into the context if not already present.
-    func update(_ item: T, updates: (T) -> Void) throws {
+    public func update(_ item: T, updates: (T) -> Void) throws {
         // Ensure the item is in the context
         modelContext.insert(item)
 
@@ -346,7 +349,7 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///   ```swift
     ///   try todoStore.delete(todoToRemove)
     ///   ```
-    func delete(_ item: T) throws {
+    public func delete(_ item: T) throws {
         modelContext.delete(item)
         try modelContext.save()
         // The didSave notification will trigger auto-fetch
@@ -374,115 +377,9 @@ final class ObservableDataStore<T>: ObservableObject, ObservableDataRepository w
     ///   ```
     ///
     /// - Warning: Use with caution as this operation cannot be undone.
-    func deleteAll(where predicate: Predicate<T>? = nil) throws {
+    public func deleteAll(where predicate: Predicate<T>? = nil) throws {
         try modelContext.delete(model: T.self, where: predicate)
         try modelContext.save()
         // The didSave notification will trigger auto-fetch
-    }
-}
-
-// MARK: - Usage Examples
-
-/// Example class demonstrating how to use the DataStore.
-///
-/// This class shows various common patterns and use cases for the DataStore.
-/// These examples use the Todo model but apply to any PersistentModel type.
-///
-@MainActor
-class ObservableDataStoreUsageExamples {
-
-    // Create a store instance for Todo model with auto-fetch enabled
-    let todoStore = ObservableDataStore<Todo>(
-        fetchConfiguration: FetchConfigrations(
-            sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
-            predicate: nil,
-            propertiesToFetch: .all,
-            relationshipKeyPathsForPrefetching: nil,
-            fetchOptions: .all
-        )
-    )
-
-    // Create a store instance without auto-fetch
-    let manualTodoStore = DataStore<Todo>()
-
-    // MARK: - Fetching Examples
-
-    /// Access auto-fetched todos
-    var todos: [Todo] {
-        todoStore.items
-    }
-
-    /// Fetch todos with only title property loaded (for performance)
-    func fetchTodoTitles() throws -> [Todo] {
-        try manualTodoStore.fetch(
-            propertiesToFetch: .custom([\Todo.title])
-        )
-    }
-
-    /// Get total count of todos
-    func getTodosCount() throws -> Int {
-        try todoStore.fetchCount()
-    }
-
-    /// Fetch high priority incomplete todos, sorted by date
-    func fetchUrgentTodos() throws -> [Todo] {
-        let high = Priority.high
-        return try todoStore.fetch(
-            sortedBy: [SortDescriptor(\.createdAt, order: .forward)],
-            predicate: #Predicate { todo in
-                todo.priority == high && !todo.isCompleted
-            },
-            fetchOptions: .paging(offset: 0, limit: 20)
-        )
-    }
-
-    // MARK: - Create/Update/Delete Examples
-
-    /// Create a new todo
-    func createTodo(title: String, priority: Priority = .medium) throws {
-        let todo = Todo(title: title, priority: priority)
-        try todoStore.create(todo)
-        // todoStore.items will automatically update
-    }
-
-    /// Update multiple properties of a todo
-    func updateTodo(
-        _ todo: Todo,
-        newTitle: String? = nil,
-        newPriority: Priority? = nil,
-        toggleComplete: Bool = false
-    ) throws {
-        try todoStore.update(todo) { item in
-            if let newTitle = newTitle {
-                item.title = newTitle
-            }
-            if let newPriority = newPriority {
-                item.priority = newPriority
-            }
-            if toggleComplete {
-                item.isCompleted.toggle()
-            }
-        }
-        // todoStore.items will automatically update
-    }
-
-    /// Delete a specific todo
-    func deleteTodo(_ todo: Todo) throws {
-        try todoStore.delete(todo)
-        // todoStore.items will automatically update
-    }
-
-    /// Delete all completed todos
-    func deleteCompletedTodos() throws {
-        try todoStore.deleteAll(
-            where: #Predicate { $0.isCompleted == true }
-        )
-        // todoStore.items will automatically update
-    }
-
-    /// Clear all todos
-    func deleteAllTodos() throws {
-        try todoStore.deleteAll()
-        // todoStore.items will automatically update
     }
 }

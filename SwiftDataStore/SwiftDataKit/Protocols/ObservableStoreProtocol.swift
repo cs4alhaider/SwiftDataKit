@@ -14,7 +14,7 @@ import Foundation
 ///
 /// - Note: The `items` property should be kept in sync with the underlying data store.
 ///
-protocol ObservableDataRepository: DataRepository, Observable {
+public protocol ObservableDataRepository: DataRepository, Observable {
     /// The current items in the store, which should be kept up-to-date and observable.
-    var items: [Model] { get set }
+    var items: [Model] { get }
 }

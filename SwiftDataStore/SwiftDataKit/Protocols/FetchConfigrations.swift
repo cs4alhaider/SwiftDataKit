@@ -48,7 +48,7 @@ import SwiftData
 /// - Note: This configuration is immutable once set in `ObservableDataStore`.
 ///         The store's `fetchConfiguration` property is marked as `let`.
 ///
-struct FetchConfigrations<Model: PersistentModel> {
+public struct FetchConfigrations<Model: PersistentModel> {
 
     /// Sort descriptors defining the order of fetched items.
     ///
@@ -62,7 +62,7 @@ struct FetchConfigrations<Model: PersistentModel> {
     ///     SortDescriptor(\.createdAt, order: .reverse)
     /// ]
     /// ```
-    let sortDescriptors: [SortDescriptor<Model>]
+    public let sortDescriptors: [SortDescriptor<Model>]
 
     /// Optional predicate to filter the fetched items.
     ///
@@ -75,7 +75,7 @@ struct FetchConfigrations<Model: PersistentModel> {
     ///     !todo.isCompleted && todo.priority == .high
     /// }
     /// ```
-    let predicate: Predicate<Model>?
+    public let predicate: Predicate<Model>?
 
     /// Specifies which properties to fetch from the model.
     ///
@@ -88,7 +88,7 @@ struct FetchConfigrations<Model: PersistentModel> {
     /// ```
     ///
     /// - SeeAlso: `PropertiesOption`
-    let propertiesToFetch: PropertiesOption<Model>
+    public let propertiesToFetch: PropertiesOption<Model>
 
     /// Relationship key paths to prefetch along with the main fetch.
     ///
@@ -105,7 +105,7 @@ struct FetchConfigrations<Model: PersistentModel> {
     ///         memory usage if relationships are large.
     ///
     /// - SeeAlso: [SwiftData FetchDescriptor Documentation](https://developer.apple.com/documentation/swiftdata/fetchdescriptor/relationshipkeypathsforprefetching)
-    let relationshipKeyPathsForPrefetching: [PartialKeyPath<Model>]?
+    public let relationshipKeyPathsForPrefetching: [PartialKeyPath<Model>]?
 
     /// Fetch options controlling pagination behavior.
     ///
@@ -118,7 +118,29 @@ struct FetchConfigrations<Model: PersistentModel> {
     /// ```
     ///
     /// - SeeAlso: `FetchOptions`
-    let fetchOptions: FetchOptions
+    public let fetchOptions: FetchOptions
+
+    /// Initializes a new fetch configuration.
+    ///
+    /// - Parameters:
+    ///   - sortDescriptors: Sort descriptors for ordering results
+    ///   - predicate: Optional predicate for filtering results
+    ///   - propertiesToFetch: Properties to fetch (default: all)
+    ///   - relationshipKeyPathsForPrefetching: Relationships to prefetch (default: nil)
+    ///   - fetchOptions: Pagination options (default: all)
+    public init(
+        sortDescriptors: [SortDescriptor<Model>] = [],
+        predicate: Predicate<Model>? = nil,
+        propertiesToFetch: PropertiesOption<Model> = .all,
+        relationshipKeyPathsForPrefetching: [PartialKeyPath<Model>]? = nil,
+        fetchOptions: FetchOptions = .all
+    ) {
+        self.sortDescriptors = sortDescriptors
+        self.predicate = predicate
+        self.propertiesToFetch = propertiesToFetch
+        self.relationshipKeyPathsForPrefetching = relationshipKeyPathsForPrefetching
+        self.fetchOptions = fetchOptions
+    }
 }
 
 // MARK: - Default Configuration
@@ -145,7 +167,7 @@ extension FetchConfigrations {
     ///
     /// - Note: Marked as `nonisolated` to allow usage from any isolation context,
     ///         including as a default parameter value.
-    nonisolated static var `default`: Self {
+    public nonisolated static var `default`: Self {
         Self(
             sortDescriptors: [],
             predicate: nil,

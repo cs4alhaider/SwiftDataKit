@@ -37,7 +37,7 @@ import SwiftData
 /// )
 /// ```
 ///
-struct DataStore<T>: DataRepository where T: PersistentModel {
+public struct DataStore<T>: DataRepository where T: PersistentModel {
 
     // MARK: - Properties
 
@@ -54,7 +54,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///
     /// - Note: Ensure `SwiftDataKit.configure()` has been called at app startup
     ///         before creating DataStore instances.
-    init(modelContext: ModelContext? = nil) {
+    public init(modelContext: ModelContext? = nil) {
         self.modelContext = modelContext ?? SwiftDataKit.shared.modelContext
     }
 
@@ -74,7 +74,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   let newTodo = Todo(title: "Write documentation")
     ///   try todoStore.create(newTodo)
     ///   ```
-    func create(_ item: T) throws {
+    public func create(_ item: T) throws {
         modelContext.insert(item)
         try modelContext.save()
     }
@@ -119,7 +119,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     /// - SeeAlso:
     ///   - https://developer.apple.com/documentation/swiftdata/fetchdescriptor
     ///   - https://www.hackingwithswift.com/quick-start/swiftdata/how-to-create-a-custom-fetchdescriptor
-    func fetch(
+    public func fetch(
         sortedBy sortDescriptors: [SortDescriptor<T>] = [],
         predicate: Predicate<T>? = nil,
         propertiesToFetch: PropertiesOption<T> = .all,
@@ -162,7 +162,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   ```
     ///
     /// - SeeAlso: https://www.hackingwithswift.com/quick-start/swiftdata/how-to-find-a-swiftdata-object-by-its-identifier
-    func fetch(id: PersistentIdentifier) throws -> T? {
+    public func fetch(id: PersistentIdentifier) throws -> T? {
         modelContext.registeredModel(for: id)
     }
 
@@ -184,7 +184,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   )
     ///   print("Completed todos: \(completedCount)")
     ///   ```
-    func fetchCount(predicate: Predicate<T>? = nil) throws -> Int {
+    public func fetchCount(predicate: Predicate<T>? = nil) throws -> Int {
         let fetchRequest: FetchDescriptor<T> = FetchDescriptor<T>(
             predicate: predicate
         )
@@ -214,7 +214,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   ```
     ///
     /// - Note: The item is automatically inserted into the context if not already present.
-    func update(_ item: T, updates: (T) -> Void) throws {
+    public func update(_ item: T, updates: (T) -> Void) throws {
         // Ensure the item is in the context
         modelContext.insert(item)
 
@@ -241,7 +241,7 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   ```swift
     ///   try todoStore.delete(todoToRemove)
     ///   ```
-    func delete(_ item: T) throws {
+    public func delete(_ item: T) throws {
         modelContext.delete(item)
         try modelContext.save()
     }
@@ -268,93 +268,8 @@ struct DataStore<T>: DataRepository where T: PersistentModel {
     ///   ```
     ///
     /// - Warning: Use with caution as this operation cannot be undone.
-    func deleteAll(where predicate: Predicate<T>? = nil) throws {
+    public func deleteAll(where predicate: Predicate<T>? = nil) throws {
         try modelContext.delete(model: T.self, where: predicate)
         try modelContext.save()
-    }
-}
-
-// MARK: - Usage Examples
-
-/// Example class demonstrating how to use the DataStore.
-///
-/// This class shows various common patterns and use cases for the DataStore.
-/// These examples use the Todo model but apply to any PersistentModel type.
-///
-@MainActor
-class DataStoreUsageExamples {
-
-    // Create a store instance for Todo model
-    let todoStore = DataStore<Todo>()
-
-    // MARK: - Fetching Examples
-
-    /// Fetch todos with only title property loaded (for performance)
-    func fetchTodoTitles() throws -> [Todo] {
-        try todoStore.fetch(
-            propertiesToFetch: .custom([\Todo.title])
-        )
-    }
-
-    /// Get total count of todos
-    func getTodosCount() throws -> Int {
-        try todoStore.fetchCount()
-    }
-
-    /// Fetch high priority incomplete todos, sorted by date
-    func fetchUrgentTodos() throws -> [Todo] {
-        let high = Priority.high
-        return try todoStore.fetch(
-            sortedBy: [SortDescriptor(\.createdAt, order: .forward)],
-            predicate: #Predicate { todo in
-                todo.priority == high && !todo.isCompleted
-            },
-            fetchOptions: .paging(offset: 0, limit: 20)
-        )
-    }
-
-    // MARK: - Create/Update/Delete Examples
-
-    /// Create a new todo
-    func createTodo(title: String, priority: Priority = .medium) throws {
-        let todo = Todo(title: title, priority: priority)
-        try todoStore.create(todo)
-    }
-
-    /// Update multiple properties of a todo
-    func updateTodo(
-        _ todo: Todo,
-        newTitle: String? = nil,
-        newPriority: Priority? = nil,
-        toggleComplete: Bool = false
-    ) throws {
-        try todoStore.update(todo) { item in
-            if let newTitle = newTitle {
-                item.title = newTitle
-            }
-            if let newPriority = newPriority {
-                item.priority = newPriority
-            }
-            if toggleComplete {
-                item.isCompleted.toggle()
-            }
-        }
-    }
-
-    /// Delete a specific todo
-    func deleteTodo(_ todo: Todo) throws {
-        try todoStore.delete(todo)
-    }
-
-    /// Delete all completed todos
-    func deleteCompletedTodos() throws {
-        try todoStore.deleteAll(
-            where: #Predicate { $0.isCompleted == true }
-        )
-    }
-
-    /// Clear all todos
-    func deleteAllTodos() throws {
-        try todoStore.deleteAll()
     }
 }

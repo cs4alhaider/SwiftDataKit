@@ -11,7 +11,7 @@ import SwiftData
 // MARK: - DataRepository
 
 /// A protocol defining the required functionality for a data repository.
-protocol DataRepository<Model>: Sendable {
+public protocol DataRepository<Model>: Sendable {
 
     /// The type of the item to be stored.
     associatedtype Model: PersistentModel
